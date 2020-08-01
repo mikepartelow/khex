@@ -26,7 +26,7 @@ with open(INPATH, 'r') as f:
     highlight = dict()
 
     for line in f:
-        line = line.strip()
+        line = line.strip().replace("\ufeff", '')
 
         if index == 0:
             highlight['book'] = line
@@ -40,17 +40,21 @@ with open(INPATH, 'r') as f:
         elif index == 3:
             highlight['text'] = line
         elif index == 4:
-            text = highlight['text']
-            if 'added' in highlight and text:
-                hash = hashlib.blake2b(text.encode('utf-8')).hexdigest()
+            if line != "==========":
+                highlight['text'] += "\n" + line
+                index = 3
+            else:
+                text = highlight['text']
+                if 'added' in highlight and text:
+                    hash = hashlib.blake2b(text.encode('utf-8')).hexdigest()
 
-                if not hash in highlights:
-                    highlight['footer'] = FOOTER
-                    highlights[hash] = highlight
-                    new_highlights.append(highlight)
+                    if not hash in highlights:
+                        highlight['footer'] = FOOTER
+                        highlights[hash] = highlight
+                        new_highlights.append(highlight)
 
-            highlight = dict()
-            index = -1
+                highlight = dict()
+                index = -1
 
         index += 1
 
